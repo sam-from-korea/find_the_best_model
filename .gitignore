@@ -8,8 +8,4 @@
 *.pdf
 *.pptx
 .venv
-.pyc
-__pycache__/Model_Base_A.cpython-311.pyc
-__pycache__/Model_Base_A_Test_Evaluate.cpython-311.pyc
-__pycache__/Model_Base_A_Test_DataLoad_and_Transform.cpython-311.pyc
 *.pyc
