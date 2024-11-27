@@ -18,8 +18,8 @@ def main():
     learning_rate = 0.01
     batch_size = 128
     num_workers = 4
-    dataset_name = "Galaxy_0.3_0.5_3444"
-    dataset_dir = f"/data/dydtkddhkdwk/repos/Lecture_MachineLearning_Competition/02_Data/{dataset_name}"
+    dataset_name = "Galaxy10"
+    dataset_dir = f"C:/Users/xsamk/Documents/GitHub/find_the_best_model/{dataset_name}"
     
     model_ft = ResNet18(num_classes=10).cuda()
     
