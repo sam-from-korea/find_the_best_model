@@ -19,14 +19,14 @@ def main():
     batch_size = 128
     num_workers = 4
     dataset_name = "Galaxy10"
-    dataset_dir = f"C:/Users/xsamk/Documents/GitHub/find_the_best_model/{dataset_name}"
+    dataset_dir = f"/data/a2018101819/repos/실전기계학습/final_project/{dataset_name}"
     
-    model_ft = ResNet18(num_classes=10).cuda()
+    model_ft = ResNet34(num_classes=10).cuda()
+    model_name = "ResNet34"
     
-    model_name = "ResNet18"
     optimizer_name = "nn.CrossEntropyLoss()"
-    scheduler_name = "optim.SGD(model_ft.parameters(), lr=learning_rate, momentum=0.9)"
-    loss_func_name = "lr_scheduler.StepLR(optimizer_ft, step_size=schedule_steps, gamma=0.1)"
+    scheduler_name = f"optim.SGD(model_ft.parameters(), lr={learning_rate}, momentum=0.9)"
+    loss_func_name = f"lr_scheduler.StepLR(optimizer_ft, step_size={schedule_steps}, gamma=0.1)"
     #######################################
 
     current_dir = os.path.dirname(os.path.abspath(__file__))
