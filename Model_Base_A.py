@@ -116,6 +116,7 @@ class ResNet(nn.Module):
         # print("Size after linear layer:", out.size())
     
         return out
+
 def ResNet18(num_classes=10):
     return ResNet(BasicBlock, [2,2,2,2], num_classes)
 
