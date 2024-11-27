@@ -1,0 +1,6 @@
+*.out
+*.swp
+.vscode
+*.csv
+*.txt
+*.pth
