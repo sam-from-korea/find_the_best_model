@@ -18,15 +18,15 @@ def main():
     learning_rate = 0.01
     batch_size = 128
     num_workers = 4
-    dataset_name = "Galaxy_0.3_0.5_3444"
-    dataset_dir = f"/data/dydtkddhkdwk/repos/Lecture_MachineLearning_Competition/02_Data/{dataset_name}"
+    dataset_name = "Galaxy10"
+    dataset_dir = f"/data/a2018101819/repos/실전기계학습/final_project/{dataset_name}"
     
-    model_ft = ResNet18(num_classes=10).cuda()
+    model_ft = ResNet34(num_classes=10).cuda()
+    model_name = "ResNet34"
     
-    model_name = "ResNet18"
     optimizer_name = "nn.CrossEntropyLoss()"
-    scheduler_name = "optim.SGD(model_ft.parameters(), lr=learning_rate, momentum=0.9)"
-    loss_func_name = "lr_scheduler.StepLR(optimizer_ft, step_size=schedule_steps, gamma=0.1)"
+    scheduler_name = f"optim.SGD(model_ft.parameters(), lr={learning_rate}, momentum=0.9)"
+    loss_func_name = f"lr_scheduler.StepLR(optimizer_ft, step_size={schedule_steps}, gamma=0.1)"
     #######################################
 
     current_dir = os.path.dirname(os.path.abspath(__file__))

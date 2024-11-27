@@ -8,3 +8,6 @@
 *.pdf
 *.pptx
 .venv
+*.pyc
+*.jpg
+*.sh

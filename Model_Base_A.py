@@ -80,6 +80,7 @@ class ResNet(nn.Module):
             layers.append(block(self.in_planes, planes, stride))
             self.in_planes = planes * block.expansion
         return nn.Sequential(*layers)
+    
     def forward(self, x):
         # print("Size before conv1 and bn1:", x.size())
         out = F.relu(self.bn1(self.conv1(x)))
@@ -115,6 +116,7 @@ class ResNet(nn.Module):
         # print("Size after linear layer:", out.size())
     
         return out
+
 def ResNet18(num_classes=10):
     return ResNet(BasicBlock, [2,2,2,2], num_classes)
 
