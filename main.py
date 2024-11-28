@@ -10,12 +10,30 @@ from torch import nn, optim
 from torch.optim import lr_scheduler
 import os
 from datetime import datetime
+
+#######################################
+training_epochs = 50
+schedule_steps = 6
+learning_rate = 0.001
+batch_size = 128
+num_workers = 4
+dataset_name = "Galaxy10"
+dataset_dir = f"/data/a2018101819/repos/실전기계학습/final_project/{dataset_name}"
+
+model_ft = ResNet18(num_classes=10).cuda()
+model_name = "ResNet18"
+
+optimizer_name = "nn.CrossEntropyLoss()"
+scheduler_name = f"optim.SGD(model_ft.parameters(), lr={learning_rate}, momentum=0.9)"
+loss_func_name = f"lr_scheduler.StepLR(optimizer_ft, step_size={schedule_steps}, gamma=0.1)"
+#######################################
+
 def main():
     # 1. 학습 관련 상수들 정의
     #######################################
     training_epochs = 50
-    schedule_steps = 7
-    learning_rate = 0.01
+    schedule_steps = 6
+    learning_rate = 0.001
     batch_size = 128
     num_workers = 4
     dataset_name = "Galaxy10"
@@ -123,6 +141,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+    print(schedule_steps, learning_rate, batch_size)
+    print(optimizer_name ,scheduler_name, loss_func_name)
 
 
 
