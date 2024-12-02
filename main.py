@@ -11,40 +11,22 @@ from torch.optim import lr_scheduler
 import os
 from datetime import datetime
 
-#######################################
-training_epochs = 50
-schedule_steps = 6
-learning_rate = 0.001
-batch_size = 128
-num_workers = 4
-dataset_name = "Galaxy10"
-dataset_dir = f"/data/a2018101819/repos/실전기계학습/final_project/{dataset_name}"
-
-model_ft = ResNet18(num_classes=10).cuda()
-model_name = "ResNet18"
-
-optimizer_name = "nn.CrossEntropyLoss()"
-scheduler_name = f"optim.SGD(model_ft.parameters(), lr={learning_rate}, momentum=0.9)"
-loss_func_name = f"lr_scheduler.StepLR(optimizer_ft, step_size={schedule_steps}, gamma=0.1)"
-#######################################
-
 def main():
     # 1. 학습 관련 상수들 정의
     #######################################
-    training_epochs = 50
+    training_epochs = 20
     schedule_steps = 6
     learning_rate = 0.001
     batch_size = 128
     num_workers = 4
-    dataset_name = "Galaxy10"
-    dataset_dir = f"/data/a2018101819/repos/실전기계학습/final_project/{dataset_name}"
+    dataset_dir = "/data/a2018101819/repos/실전기계학습/final_project/Galaxy10"
     
-    model_ft = ResNet34(num_classes=10).cuda()
-    model_name = "ResNet34"
+    model_ft = ResNet18(num_classes=10).cuda()
+    model_name = "ResNet18"
     
     optimizer_name = "nn.CrossEntropyLoss()"
-    scheduler_name = f"optim.SGD(model_ft.parameters(), lr={learning_rate}, momentum=0.9)"
-    loss_func_name = f"lr_scheduler.StepLR(optimizer_ft, step_size={schedule_steps}, gamma=0.1)"
+    scheduler_name = "optim.Adam(model_ft.parameters(), lr=learning_rate, momentum=0.9)"
+    loss_func_name = "lr_scheduler.StepLR(optimizer_ft, step_size=schedule_steps, gamma=0.1)"
     #######################################
 
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -65,7 +47,7 @@ def main():
 
     # 3. Loss, Optimizer, Scheduler 설정
     criterion = nn.CrossEntropyLoss()
-    optimizer_ft = optim.SGD(model_ft.parameters(), lr=learning_rate, momentum=0.9)
+    optimizer_ft = optim.Adam(model_ft.parameters(), lr=learning_rate, momentum=0.9)
     exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=schedule_steps, gamma=0.1)
     
     # 4. 데이터 로더 불러오기
@@ -141,9 +123,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-    print(schedule_steps, learning_rate, batch_size)
-    print(optimizer_name ,scheduler_name, loss_func_name)
-
-
 
 ## 스케줄러, 로스펑션, 옵티마이저 이름 문자열로 넘기기
