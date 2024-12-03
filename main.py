@@ -10,38 +10,23 @@ from torch import nn, optim
 from torch.optim import lr_scheduler
 import os
 from datetime import datetime
-import torch.nn.functional as F
 
-class FocalLoss(nn.Module):
-    def __init__(self, alpha=None, gamma=2, reduction='mean'):
-        super(FocalLoss, self).__init__()
-        if alpha is None:  
-            # 기본값으로 모든 클래스에 동일한 가중치
-            self.alpha = torch.tensor([1.0, 1.0, 1.0, 1.0, 1.0, 
-                                       1.0, 1.0, 1.0, 1.0, 1.0,])
-        else:
-            self.alpha = torch.tensor(alpha)
-        self.gamma = gamma
-        self.reduction = reduction
+#######################################
+training_epochs = 50
+schedule_steps = 6
+learning_rate = 0.001
+batch_size = 128
+num_workers = 4
+dataset_name = "Galaxy10"
+dataset_dir = f"/data/a2018101819/repos/실전기계학습/final_project/{dataset_name}"
 
-    def forward(self, inputs, targets):
-        # self.alpha를 GPU로 이동
-        if inputs.is_cuda:  
-            self.alpha = self.alpha.to(inputs.device)
+model_ft = ResNet18(num_classes=10).cuda()
+model_name = "ResNet18"
 
-        # inputs의 크기: [batch_size, num_classes]
-        # targets의 크기: [batch_size]
-        CE_loss = F.cross_entropy(inputs, targets, reduction='none')
-        alpha_factor = self.alpha[targets]
-        pt = torch.exp(-CE_loss)  # 각 타겟에 대해 해당 클래스의 alpha 값
-        F_loss = alpha_factor * (1 - pt) ** self.gamma * CE_loss
-
-        if self.reduction == 'mean':
-            return torch.mean(F_loss)
-        elif self.reduction == 'sum':
-            return torch.sum(F_loss)
-        else:
-            return F_loss
+optimizer_name = "nn.CrossEntropyLoss()"
+scheduler_name = f"optim.SGD(model_ft.parameters(), lr={learning_rate}, momentum=0.9)"
+loss_func_name = f"lr_scheduler.StepLR(optimizer_ft, step_size={schedule_steps}, gamma=0.1)"
+#######################################
 
 def main():
     # 1. 학습 관련 상수들 정의
@@ -56,9 +41,9 @@ def main():
     model_ft = ResNet18(num_classes=10).cuda()
     model_name = "ResNet18"
     
-    optimizer_name = "optim.AdamW(model_ft.parameters(), lr=learning_rate)"
-    scheduler_name = "lr_scheduler.StepLR(optimizer_ft, step_size=schedule_steps, gamma=0.1)"
-    loss_func_name = "FocalLoss(alpha=[0.5, 3.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], gamma=0)"
+    optimizer_name = "nn.CrossEntropyLoss()"
+    scheduler_name = f"optim.SGD(model_ft.parameters(), lr={learning_rate}, momentum=0.9)"
+    loss_func_name = f"lr_scheduler.StepLR(optimizer_ft, step_size={schedule_steps}, gamma=0.1)"
     #######################################
 
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -78,8 +63,8 @@ def main():
     torchsummary.summary(model_ft, (3, 256, 256))
 
     # 3. Loss, Optimizer, Scheduler 설정
-    criterion = FocalLoss(alpha=[1.0, 3.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], gamma=0)
-    optimizer_ft = optim.AdamW(model_ft.parameters(), lr=learning_rate)
+    criterion = nn.CrossEntropyLoss()
+    optimizer_ft = optim.SGD(model_ft.parameters(), lr=learning_rate, momentum=0.9)
     exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=schedule_steps, gamma=0.1)
     
     # 4. 데이터 로더 불러오기
