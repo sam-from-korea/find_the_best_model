@@ -4,46 +4,59 @@ from Model_Base_A_Train_DataLoad_and_Transform import get_loaders
 from Model_Base_A_Test_DataLoad_and_Transform import get_test_loader
 from Model_Base_A_Training import train_model
 from Model_Base_A_Test_Evaluate import evaluate
-from Model_Base_A import ResNet18, ResNet34
+from Model_Base_A import ResNet18, ResNet34, ResNet152, ResNet50
 import torchsummary
 from torch import nn, optim
 from torch.optim import lr_scheduler
 import os
 from datetime import datetime
+import torch.nn.functional as F
+import time
 
-#######################################
-training_epochs = 50
-schedule_steps = 6
-learning_rate = 0.001
-batch_size = 128
-num_workers = 4
-dataset_name = "Galaxy10"
-dataset_dir = f"/data/a2018101819/repos/실전기계학습/final_project/{dataset_name}"
+class FocalLoss(nn.Module):
+    def __init__(self, alpha=None, gamma=2, reduction='mean'):
+        super(FocalLoss, self).__init__()
+        if alpha is None:  
+            # 기본값으로 모든 클래스에 동일한 가중치
+            self.alpha = torch.tensor([1.0, 1.0, 1.0, 1.0, 1.0, 
+                                       1.0, 1.0, 1.0, 1.0, 1.0,])
+        else:
+            self.alpha = torch.tensor(alpha)
+        self.gamma = gamma
+        self.reduction = reduction
 
-model_ft = ResNet18(num_classes=10).cuda()
-model_name = "ResNet18"
+    def forward(self, inputs, targets):
+        # self.alpha를 GPU로 이동
+        if inputs.is_cuda:  
+            self.alpha = self.alpha.to(inputs.device)
 
-optimizer_name = "nn.CrossEntropyLoss()"
-scheduler_name = f"optim.SGD(model_ft.parameters(), lr={learning_rate}, momentum=0.9)"
-loss_func_name = f"lr_scheduler.StepLR(optimizer_ft, step_size={schedule_steps}, gamma=0.1)"
-#######################################
+        # inputs의 크기: [batch_size, num_classes]
+        # targets의 크기: [batch_size]
+        CE_loss = F.cross_entropy(inputs, targets, reduction='none')
+        alpha_factor = self.alpha[targets]
+        pt = torch.exp(-CE_loss)  # 각 타겟에 대해 해당 클래스의 alpha 값
+        F_loss = alpha_factor * (1 - pt) ** self.gamma * CE_loss
+
+        if self.reduction == 'mean':
+            return torch.mean(F_loss)
+        elif self.reduction == 'sum':
+            return torch.sum(F_loss)
+        else:
+            return F_loss
 
 def main():
+    since = time.time()
     # 1. 학습 관련 상수들 정의
     #######################################
     training_epochs = 20
     schedule_steps = 6
-    learning_rate = 0.001
-    batch_size = 128
+    learning_rate = 0.0001
+    batch_size = 64
     num_workers = 4
     dataset_dir = "/data/a2018101819/repos/실전기계학습/final_project/Galaxy10"
     
     model_ft = ResNet18(num_classes=10).cuda()
     model_name = "ResNet18"
-    
-    optimizer_name = "nn.CrossEntropyLoss()"
-    scheduler_name = f"optim.SGD(model_ft.parameters(), lr={learning_rate}, momentum=0.9)"
-    loss_func_name = f"lr_scheduler.StepLR(optimizer_ft, step_size={schedule_steps}, gamma=0.1)"
     #######################################
 
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -63,9 +76,22 @@ def main():
     torchsummary.summary(model_ft, (3, 256, 256))
 
     # 3. Loss, Optimizer, Scheduler 설정
-    criterion = nn.CrossEntropyLoss()
-    optimizer_ft = optim.SGD(model_ft.parameters(), lr=learning_rate, momentum=0.9)
-    exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=schedule_steps, gamma=0.1)
+    #######################################
+    loss_func = FocalLoss(alpha=[0.866551127, 5.319148936, 1.642036125, 0.946969697, 1.25,
+                                 0.875656743, 0.956937799, 0.670241287, 0.675219446, 0.968054211
+                                 ], gamma=1)
+    loss_func_name = f"{loss_func}"
+    criterion = loss_func
+    
+    optimizer = optim.Adam(model_ft.parameters(), lr=learning_rate)
+    optimizer_name = f"{optimizer}"
+    optimizer_ft = optimizer
+    
+    scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=schedule_steps, gamma=0.1)
+    scheduler_name = f"{scheduler}"
+    exp_lr_scheduler = scheduler
+    
+    #######################################
     
     # 4. 데이터 로더 불러오기
     print("Loading data...")
@@ -136,7 +162,11 @@ def main():
                       batch_size =batch_size
                       )
 
+    time_elapsed = time.time() - since
+    print('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
     print("All tasks completed successfully.")
+    
+    
 
 if __name__ == "__main__":
     main()
