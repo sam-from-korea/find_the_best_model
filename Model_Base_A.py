@@ -69,8 +69,9 @@ class ResNet(nn.Module):
         self.bn1 = nn.BatchNorm2d(64)
         self.layer1 = self._make_layer(block, 64, num_blocks[0], stride=2)
         self.layer2 = self._make_layer(block, 128, num_blocks[1], stride=2)
-        self.layer3 = self._make_layer(block, 128, num_blocks[2], stride=2)
-        self.layer4 = self._make_layer(block, 128, num_blocks[2], stride=2)
+        self.layer3 = self._make_layer(block, 128, num_blocks[1], stride=2)
+        self.layer4 = self._make_layer(block, 128, num_blocks[1], stride=2)
+        self.layer5 = self._make_layer(block, 256, num_blocks[2], stride=2)
         self.linear = None  # 선형 계층 초기화는 forward에서 처리
 
     def _make_layer(self, block, planes, num_blocks, stride):
@@ -82,43 +83,21 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
     
     def forward(self, x):
-        # print("Size before conv1 and bn1:", x.size())
         out = F.relu(self.bn1(self.conv1(x)))
-        # print("Size after conv1 and bn1:", out.size())
-        
         out = self.layer1(out)
-        # print("Size after layer1:", out.size())
-        
         out = self.layer2(out)
-        # print("Size after layer2:", out.size())
-        
         out = self.layer3(out)
-        # print("Size after layer3:", out.size())
-        
         out = self.layer4(out)
-        # print("Size after layer4:", out.size())
-        
+        out = self.layer5(out)
         out = F.avg_pool2d(out, 4)
-        # print("Size after avg_pool2d:", out.size())
-        
         out = out.view(out.size(0), -1)
-        # print("Size after view (flatten):", out.size())
-        
-        # print("1 : out의 사이즈:", out.size())
-        
-        # 선형 계층 입력 크기 동적 계산
         if self.linear is None:
             self.linear = nn.Linear(out.size(1), self.num_classes).to(out.device)
-        
-        # print("2 : out의 사이즈:", out.size())
-        
         out = self.linear(out)
-        # print("Size after linear layer:", out.size())
-    
         return out
 
 def ResNet18(num_classes=10):
-    return ResNet(BasicBlock, [2,2,2,2], num_classes)
+    return ResNet(BasicBlock, [2, 2, 2, 2, 2], num_classes)
 
 def ResNet34(num_classes=10):
     return ResNet(BasicBlock, [3,4,6,3], num_classes)
